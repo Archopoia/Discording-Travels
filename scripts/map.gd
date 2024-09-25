@@ -10,7 +10,7 @@ const SYMBOL_FOREST = "𓍊𓋼"
 const SYMBOL_OUTPOST = "✪"
 const SYMBOL_COLONY = "⛨"  # Colony symbol
 var TileScene = preload("res://scenes/Tile.tscn")
-
+var colony_tile_pos: Vector2
 # Map size and tile settings
 var map_size = Vector2(72, 42)
 var tile_size = Vector2(22, 22)  # Set the size for each tile
@@ -442,12 +442,12 @@ func place_outpost_near_oasis(oasis: Dictionary) -> void:
 func place_colony() -> void:
     var center_x = int(map_size.x / 2)
     var center_y = int(map_size.y / 2)
+    colony_tile_pos = Vector2(center_x, center_y)  # Store the colony tile position
     var tile_data = biome_data[center_y * map_size.x + center_x]
     tile_data.symbol = SYMBOL_COLONY
     tile_data.biome = "Colony"
-
-    # Ensure at least one adjacent tile is not a hill
     ensure_non_hill_adjacent(center_x, center_y)
+
 
 # Ensure one of the adjacent tiles is not a hill
 func ensure_non_hill_adjacent(x: int, y: int) -> void:
@@ -497,18 +497,19 @@ func remove_point_from_path():
         path_line.remove_point(0)  # This removes the first point from the path
 
 # Show tooltip on mouse enter if the tile is not covered by fog
-func _on_tile_mouse_entered(x: int, y: int, tile: Button):
+func _on_tile_mouse_entered(x: int, y: int, tile_button: Button):
     var index = y * map_size.x + x
     if not fog_data[index]:  # Check if the tile is not covered by fog
         var tile_data = biome_data[index]
         tooltip.text = "... " + tile_data.biome  # Show the biome type
 
-        # Position the tooltip relative to the tile's position
-        tooltip.position = tile.position + Vector2(0, tile_size.y + 5)  # Place it below the tile
+        # Set the tooltip position relative to the hovered tile's global position
+        tooltip.position = tile_button.get_global_position() + Vector2(-370, tile_button.size.y +0)
 
         tooltip.visible = true
     else:
         tooltip.visible = false  # Hide if the tile is still covered by fog
+
 
 # Hide tooltip on mouse exit
 func _on_tile_mouse_exited():
