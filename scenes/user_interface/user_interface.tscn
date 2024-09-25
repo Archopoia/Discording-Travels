@@ -116,10 +116,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_t1fhv")
-current_tab = 1
+current_tab = 0
 
 [node name="Colony" type="HBoxContainer" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer"]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -168,17 +167,18 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 8
 
-[node name="GetColon" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer" node_paths=PackedStringArray("chat_log_container") instance=ExtResource("3_byq0d")]
+[node name="GetPioneer" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer" node_paths=PackedStringArray("chat_log_container") instance=ExtResource("3_byq0d")]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 1
-resource_type = "Gold"
-tooltip_description = "+1 Colon"
+resource_type = "Pioneers"
+max_amount = 1
+tooltip_description = "+1 Pioneer"
 timer_length = 1.0
 chat_log_container = NodePath("../../../../../../../../LeftPanel/ScrollContainer/VBoxContainer")
 
-[node name="Button" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer/GetColon" index="1"]
-text = "Colon"
+[node name="Button" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer/GetPioneer" index="1"]
+text = "Pioneer"
 
 [node name="Button2" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer" node_paths=PackedStringArray("chat_log_container") instance=ExtResource("3_byq0d")]
 custom_minimum_size = Vector2(0, 40)
@@ -255,17 +255,19 @@ layout_mode = 2
 text = "Knowledge : 0"
 script = ExtResource("2_vjwei")
 
-[node name="Gold" type="Label" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Resources/MarginContainer/VBoxContainer" groups=["resources"]]
+[node name="Pioneers" type="Label" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Resources/MarginContainer/VBoxContainer" groups=["resources"]]
+visible = false
 layout_mode = 2
-text = "Gold : 0"
+text = "Pioneers : 0"
 script = ExtResource("2_vjwei")
-resource_type = "Gold"
+resource_type = "Pioneers"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Exploration" type="Control" parent="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -346,6 +348,6 @@ theme_override_constants/margin_bottom = 16
 layout_mode = 2
 
 [editable path="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/MarginContainer/VBoxContainer/GetKnowledge"]
-[editable path="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer/GetColon"]
+[editable path="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer/GetPioneer"]
 [editable path="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Request/VBoxContainer/Button2"]
 [editable path="VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Colony/VBoxContainer/Build/VBoxContainer/PrototypeClicker"]

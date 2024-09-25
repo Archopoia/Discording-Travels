@@ -34,9 +34,9 @@ func _ready():
 	# Define existing events with conditions, options, and priorities
 	var event_1 = Event.new(
 		"A strange traveler offers you a deal.",
-		[{"type": "resource", "name": "Gold", "amount": 2}, {"type": "situation", "name": "outpost_built", "state": false}],
+		[{"type": "resource", "name": "Pioneers", "amount": 3}, {"type": "situation", "name": "outpost_built", "state": false}],
 		[ 
-			{"text": "Accept the deal", "consequences": [{"type": "resource", "name": "Gold", "amount": -50}, {"type": "resource", "name": "Knowledge", "amount": 10}]},
+			{"text": "Accept the deal", "consequences": [{"type": "resource", "name": "Wood", "amount": 10}, {"type": "resource", "name": "Knowledge", "amount": 10}]},
 			{"text": "Refuse the deal", "consequences": [{"type": "resource", "name": "Knowledge", "amount": -5}]}
 		],
 		-1,  # No time reset, one-time event

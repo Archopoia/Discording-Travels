@@ -2,7 +2,7 @@ class_name PrototypeClicker
 extends Control
 
 # Exported variables to configure different resource types, amount, tooltip, and chat log messages
-@export var resource_type: String = "Knowledge"  # Define the type of resource (e.g., "Knowledge", "Wood", "Gold")
+@export var resource_type: String = "Knowledge"  # Define the type of resource (e.g., "Knowledge", "Wood", "Pioneer")
 @export var min_amount: int = 1  # Minimum amount of resource to generate
 @export var max_amount: int = 3  # Maximum amount of resource to generate
 @export var tooltip_description: String = "This button creates a resource and has a cooldown."  # Tooltip text
