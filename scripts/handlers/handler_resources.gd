@@ -4,7 +4,6 @@ extends Node
 ## Singleton reference
 static var ref : HandlerResources
 var log_scene = preload("res://scenes/user_interface/log.tscn")  # Load the log.tscn scene
-var pioneer_pixel_scene = preload("res://scenes/PioneerPixel.tscn")  # Preload the PioneerPixel scene
 var request_shown = false
 var pioneer_label_shown = false
 
@@ -127,34 +126,6 @@ func update_resource(resource_type: String, adjustment: int) -> void:
 
 	# Trigger event checks after resource update
 	get_node("/root/Game/Handlers/Events").check_events()
-
-# Function to create and place pioneer pixels on the map
-func place_pioneer_pixels(tile_position: Vector2, pioneer_count: int):
-	# Reference to tile size (assuming you have a 22x22 size)
-	var tile_size = Vector2(22, 22)
-
-	# Store positions that already have a pioneer to avoid overlap
-	var used_positions = []
-
-	# Loop to create pioneer pixels
-	for i in range(pioneer_count):
-		var pioneer_pixel = pioneer_pixel_scene.instantiate()
-
-		# Generate a random position within the tile, avoiding overlaps
-		var random_pos = Vector2(randf_range(0, tile_size.x - 4), randf_range(0, tile_size.y - 4))
-
-		# Avoid positions that are already used
-		while used_positions.has(random_pos):
-			random_pos = Vector2(randf_range(0, tile_size.x - 4), randf_range(0, tile_size.y - 4))
-		
-		# Mark this position as used
-		used_positions.append(random_pos)
-
-		# Set the position relative to the tile
-		pioneer_pixel.position = tile_position + random_pos
-
-		# Add the pixel to the map (parent node)
-		get_parent().add_child(pioneer_pixel)
 
 
 ## NEW FUNCTION: Updates a situation

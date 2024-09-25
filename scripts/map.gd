@@ -158,14 +158,13 @@ func generate_outpost_paths():
     
     
     
-# Generate map function
 func generate_map() -> void:
     for y in range(map_size.y):
         for x in range(map_size.x):
             var index = y * map_size.x + x
             var tile_data = biome_data[index]
 
-            # Instantiate the Tile scene
+            # Instantiate the Tile scene only once for each tile
             var tile_instance = TileScene.instantiate()
 
             # Set the symbol based on the biome
@@ -186,31 +185,6 @@ func generate_map() -> void:
             # Add the tile instance to the scene tree
             add_child(tile_instance)
 
-    for y in range(map_size.y):
-        for x in range(map_size.x):
-            var index = y * map_size.x + x
-            var tile_data = biome_data[index]
-
-            # Create a button to represent each tile
-            var tile = Button.new()
-            tile.custom_minimum_size = tile_size
-            tile.text = tile_data.symbol
-            tile.flat = false
-            tile.theme = tile_theme
-            tile.focus_mode = Control.FOCUS_NONE
-
-            # Set the position manually (convert grid coordinates to world coordinates)
-            tile.position = Vector2(x * tile_size.x, y * tile_size.y)
-
-            # Connect the mouse_entered and mouse_exited signals for the tooltip
-            tile.connect("mouse_entered", Callable(self, "_on_tile_mouse_entered").bind(x, y, tile))
-            tile.connect("mouse_exited", Callable(self, "_on_tile_mouse_exited"))
-
-            # Connect the tile's press event to move the player
-            tile.connect("pressed", Callable(self, "_on_tile_pressed").bind(x, y))
-
-            # Add the tile to the scene tree (no GridContainer, manual layout)
-            add_child(tile)
 # Initialize fog data
 func initialize_fog() -> void:
     fog_data.resize(map_size.x * map_size.y)
