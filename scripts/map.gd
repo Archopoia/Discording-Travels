@@ -308,6 +308,7 @@ func _on_tile_pressed(x: int, y: int) -> void:
 		print("Biome: ", tile_data.biome)
 		print("Symbol: ", tile_data.symbol)
 
+
 # Utility function to clear the path line
 func clear_path_line():
 	path_line.clear_points()
