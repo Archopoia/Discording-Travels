@@ -8,6 +8,11 @@ var pioneer_pixel_scene = preload("res://scenes/PioneerPixel.tscn")  # Preload t
 var request_shown = false
 var pioneer_label_shown = false
 
+# Store a reference to the spawned PioneerPixel instances
+var pioneer_pixels: Array = []
+# Define a reference to the map script (for colony tile position)
+
+
 ## Assigns itself if there is no ref, and otherwise, destroy it (singleton check)
 func _enter_tree() -> void:
 	if not ref:
@@ -32,11 +37,34 @@ var situations : Dictionary = {
 signal resource_created(resource_type : String, quantity : int)
 signal resource_consumed(resource_type : String, quantity : int)
 
+var map_node: Node = null
+
+# Function to hide the Request container on game launch
+func _ready():
+	# Get the Request container from the "requests" group
+	var requests_group = get_tree().get_nodes_in_group("requests")
+	for request_container in requests_group:
+		request_container.visible = false  # Make sure the Request container is hidden when the game launches
+	# Find the TabContainer
+	var tab_container = get_node("/root/Game/HUD/UserInterface/VBoxContainer/Bottom/RightPanel/Tabs/TabContainer")
+	
+	# Connect the tab_changed signal
+	tab_container.connect("tab_changed", Callable(self, "_on_tab_changed"))
+	# Set visibility based on the current tab when the scene loads
+	_on_tab_changed(tab_container.current_tab)
+	# Defer the node access until everything is ready
+
+	_check_resource_conditions()
+
 func _process(delta: float) -> void:
 	_check_resource_conditions()  # Continuously check the state of resources
 	
 	## This function checks the state of resources and updates UI elements accordingly
 func _check_resource_conditions() -> void:
+	var current_pioneer_count = resources["Pioneers"]
+	# Adjust PioneerPixel instances based on the number of pioneers
+	adjust_pioneer_pixel_count(current_pioneer_count)
+	
 	# Check if Knowledge has reached 10 for the first time and show request
 	if resources.has("Knowledge") and resources["Knowledge"] >= 1 and not request_shown:
 		# Get the Request container from the "requests" group
@@ -91,7 +119,7 @@ func create_resource(resource_type: String, quantity: int) -> void:
 		resources[resource_type] = quantity
 	
 	resource_created.emit(resource_type, quantity)
-
+	_check_resource_conditions()  # Check immediately after updating the resource
 	# Trigger event checks after resource update
 	get_node("/root/Game/Handlers/Events").check_events()
 
@@ -128,33 +156,87 @@ func update_resource(resource_type: String, adjustment: int) -> void:
 	# Trigger event checks after resource update
 	get_node("/root/Game/Handlers/Events").check_events()
 
-# Function to create and place pioneer pixels on the map
-func place_pioneer_pixels(tile_position: Vector2, pioneer_count: int):
-	# Reference to tile size (assuming you have a 22x22 size)
-	var tile_size = Vector2(22, 22)
+# Adjusts the number of PioneerPixel instances to match the "Pioneers" resource quantity
+func adjust_pioneer_pixel_count(desired_count: int) -> void:
+	# Adjust the count to be X-1 instead of X
+	var target_count = max(0, desired_count - 1)  # Ensure we don't go below 0
 
-	# Store positions that already have a pioneer to avoid overlap
-	var used_positions = []
+	var current_count = pioneer_pixels.size()
+	
+	# If we need to add more pioneers
+	if target_count > current_count:
+		for i in range(current_count, target_count):
+			spawn_pioneer_pixel()
+	
+	# If we need to remove pioneers
+	elif target_count < current_count:
+		for i in range(current_count - target_count):
+			despawn_oldest_pioneer_pixel()
 
-	# Loop to create pioneer pixels
-	for i in range(pioneer_count):
-		var pioneer_pixel = pioneer_pixel_scene.instantiate()
+# Function to find the index of the "Exploration" tab by its name
+func _get_exploration_tab_index(tab_container: TabContainer) -> int:
+	for i in range(tab_container.get_tab_count()):
+		if tab_container.get_tab_title(i) == "Exploration":
+			return i
+	return -1  # Return -1 if the tab isn't found
 
-		# Generate a random position within the tile, avoiding overlaps
-		var random_pos = Vector2(randf_range(0, tile_size.x - 4), randf_range(0, tile_size.y - 4))
+# Function to toggle visibility based on the selected tab
+func _on_tab_changed(tab_index: int) -> void:
+	var tab_container = get_node("/root/Game/HUD/UserInterface/VBoxContainer/Bottom/RightPanel/Tabs/TabContainer")
+	
+	# Find the index of the "Exploration" tab
+	var exploration_index = _get_exploration_tab_index(tab_container)
+	if exploration_index == -1:
+		print("Exploration tab not found!")
+		return
 
-		# Avoid positions that are already used
-		while used_positions.has(random_pos):
-			random_pos = Vector2(randf_range(0, tile_size.x - 4), randf_range(0, tile_size.y - 4))
+	var pioneers_node = get_node_or_null("/root/Game/HUD/UserInterface/VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Exploration/VBoxContainer/Pioneers")
+	
+	if pioneers_node:
+		# Show or hide the pioneers node based on whether the "Exploration" tab is selected
+		pioneers_node.visible = (tab_index == exploration_index)
 		
-		# Mark this position as used
-		used_positions.append(random_pos)
+# Function to spawn PioneerPixel instances in the "Pioneers" node
+# Spawn a PioneerPixel instance in the colony tile
+# Spawn a PioneerPixel instance in the colony tile
+func spawn_pioneer_pixel() -> void:
+	# Instantiate the PioneerPixel
+	var pioneer_pixel = pioneer_pixel_scene.instantiate()
+	map_node = get_node_or_null("/root/Game/HUD/UserInterface/VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Exploration/VBoxContainer/Map")
+	var tile_size = map_node.tile_size
+	# Generate a random offset within the colony tile (to avoid overlap)
+	var random_pos = Vector2(randf_range(0, tile_size.x - 4), randf_range(0, tile_size.y - 4))
 
-		# Set the position relative to the tile
-		pioneer_pixel.position = tile_position + random_pos
+	# Set the global position of the PioneerPixel relative to the colony tile's global position
+	pioneer_pixel.global_position = random_pos + Vector2(790, -475)
+	pioneer_pixel.z_index = 11  # Ensure it is drawn on the topmost layer
 
-		# Add the pixel to the map (parent node)
-		get_parent().add_child(pioneer_pixel)
+	# Add the PioneerPixel to the "Pioneers" node
+	var pioneers_node = get_node_or_null("/root/Game/HUD/UserInterface/VBoxContainer/Bottom/RightPanel/Tabs/TabContainer/Exploration/VBoxContainer/Pioneers")
+	
+	if pioneers_node:
+		pioneers_node.add_child(pioneer_pixel)
+	else:
+		print("Pioneers node not found!")
+	
+	# Store the spawned PioneerPixel in the list
+	pioneer_pixels.append(pioneer_pixel)
+
+
+# Removes the earliest spawned PioneerPixel
+func despawn_oldest_pioneer_pixel() -> void:
+	if pioneer_pixels.size() > 0:
+		var oldest_pioneer = pioneer_pixels[0]
+		oldest_pioneer.queue_free()  # Remove it from the scene
+		pioneer_pixels.remove_at(0)  # Remove from the list
+
+# Checks if a position overlaps with an existing pioneer
+func _position_overlaps(position: Vector2) -> bool:
+	for pioneer in pioneer_pixels:
+		if pioneer.position.distance_to(position) < 4:  # Ensure there's at least 4-pixel distance
+			return true
+	return false
+
 
 
 ## NEW FUNCTION: Updates a situation
@@ -179,10 +261,3 @@ func send_to_chatlog(message: String):
 			chat_log.move_child(new_message, 0)  # Move it to the top of the chat log
 		else:
 			print("Failed to instance log.tscn")
-
-# Function to hide the Request container on game launch
-func _ready():
-	# Get the Request container from the "requests" group
-	var requests_group = get_tree().get_nodes_in_group("requests")
-	for request_container in requests_group:
-		request_container.visible = false  # Make sure the Request container is hidden when the game launches
